@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squash</title>
+    <style>
+        /* CSS styles */
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game settings
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+    const BALL_SIZE = 20;
+    const PADDLE_WIDTH = 10;
+    const PADDLE_HEIGHT = 100;
+    const FPS = 60;
+
+    // Colors
+    const WHITE = '#FFFFFF';
+    const BLACK = '#000000';
+
+    // Player paddle settings
+    let playerPaddle = {
+        x: 50,
+        y: HEIGHT / 2 - PADDLE_HEIGHT / 2,
+        width: PADDLE_WIDTH,
+        height: PADDLE_HEIGHT
+    };
+
+    // Opponent paddle settings
+    let opponentPaddle = {
+        x: WIDTH - 50 - PADDLE_WIDTH,
+        y: HEIGHT / 2 - PADDLE_HEIGHT / 2,
+        width: PADDLE_WIDTH,
+        height: PADDLE_HEIGHT
+    };
+
+    // Ball settings
+    let ball = {
+        x: WIDTH / 2 - BALL_SIZE / 2,
+        y: HEIGHT / 2 - BALL_SIZE / 2,
+        size: BALL_SIZE,
+        speedX: 5 * (Math.random() < 0.5 ? 1 : -1),
+        speedY: 5 * (Math.random() < 0.5 ? 1 : -1)
+    };
+
+    // Function to draw the game board
+    function drawBoard() {
+        ctx.fillStyle = BLACK;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = WHITE;
+        ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
+        ctx.fillRect(opponentPaddle.x, opponentPaddle.y, opponentPaddle.width, opponentPaddle.height);
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Function to move the player paddle
+    function movePlayerPaddle(mouseY) {
+        playerPaddle.y = mouseY - playerPaddle.height / 2;
+    }
+
+    // Function to move the opponent paddle
+    function moveOpponentPaddle() {
+        if (ball.y < opponentPaddle.y + opponentPaddle.height / 2) {
+            opponentPaddle.y -= 7;
+        }
+        if (ball.y > opponentPaddle.y + opponentPaddle.height / 2) {
+            opponentPaddle.y += 7;
+        }
+    }
+
+    // Function to move the ball
+    function moveBall() {
+        ball.x += ball.speedX;
+        ball.y += ball.speedY;
+
+        if (ball.y <= 0 || ball.y + ball.size >= HEIGHT) {
+            ball.speedY *= -1;
+        }
+
+        if (
+            (ball.x <= playerPaddle.x + playerPaddle.width && ball.y >= playerPaddle.y && ball.y <= playerPaddle.y + playerPaddle.height) ||
+            (ball.x + ball.size >= opponentPaddle.x && ball.y >= opponentPaddle.y && ball.y <= opponentPaddle.y + opponentPaddle.height)
+        ) {
+            ball.speedX *= -1;
+        }
+
+        return ball.x <= 0 || ball.x + ball.size >= WIDTH;
+
+    }
+
+    // Function to draw the "Game Over" screen
+    function drawGameOverScreen() {
+        // Clear the canvas
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        // Draw the "Game Over" message
+        ctx.fillStyle = WHITE;
+        ctx.font = "48px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Game Over", WIDTH / 2, HEIGHT / 2);
+    }
+
+    // Main game loop
+    function main() {
+        // Event listener for mouse movement
+        canvas.addEventListener('mousemove', function(event) {
+            movePlayerPaddle(event.clientY);
+        });
+
+        // Main game loop
+        setInterval(function() {
+            moveOpponentPaddle();
+            if (moveBall()) {
+                clearInterval(intervalId);
+            }
+            drawBoard();
+        }, 1000 / FPS);
+    }
+
+    main();
+</script>
+</body>
+</html>
+
