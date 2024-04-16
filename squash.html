@@ -103,8 +103,6 @@
 
     // Function to draw the "Game Over" screen
     function drawGameOverScreen() {
-        // Clear the canvas
-        ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
         // Draw the "Game Over" message
         ctx.fillStyle = WHITE;
@@ -124,10 +122,12 @@
         setInterval(function() {
             moveOpponentPaddle();
             if (moveBall()) {
+                drawGameOverScreen();
                 clearInterval(intervalId);
             }
             drawBoard();
         }, 1000 / FPS);
+
     }
 
     main();
